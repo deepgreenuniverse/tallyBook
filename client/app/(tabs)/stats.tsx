@@ -37,16 +37,6 @@ export default function StatsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 刷新数据（供其他地方调用）
-  const refresh = async () => {
-    const [data, savedBudget] = await Promise.all([
-      StorageService.getRecords(),
-      StorageService.getBudget(),
-    ]);
-    setRecords(data);
-    setBudget(savedBudget);
-  };
-
   // 统计数据
   const total = records.reduce((sum, r) => sum + r.amount, 0);
   const remaining = budget > 0 ? budget - total : 0;
@@ -97,7 +87,8 @@ export default function StatsPage() {
         style: 'destructive',
         onPress: async () => {
           await StorageService.deleteRecord(id);
-          refresh();
+          const data = await StorageService.getRecords();
+          setRecords(data);
         },
       },
     ]);
