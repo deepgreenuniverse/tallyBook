@@ -58,6 +58,18 @@ export default function StatsPage() {
     total: records.filter((r) => r.category === cat.id).reduce((sum, r) => sum + r.amount, 0),
   })).filter((c) => c.total > 0).sort((a, b) => b.total - a.total);
 
+  // 预算输入格式化
+  const handleBudgetInputChange = (value: string) => {
+    const cleaned = value.replace(/[^\d.]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) return;
+    // 限制整数部分 7 位（最大 9999999）
+    if (parts[0].length > 7) return;
+    if (parts[1] && parts[1].length > 2) parts[1] = parts[1].slice(0, 2);
+    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    setBudgetInput(parts.length > 1 ? intPart + '.' + parts[1] : intPart);
+  };
+
   // 设置预算
   const handleSetBudget = async () => {
     // 去掉千分位符号后解析
@@ -66,20 +78,14 @@ export default function StatsPage() {
       Alert.alert('提示', '请输入有效金额');
       return;
     }
+    if (num > 9999999) {
+      Alert.alert('提示', '预算不能超过 1000 万');
+      return;
+    }
     await StorageService.setBudget(num);
     setBudget(num);
     setShowBudgetModal(false);
     setBudgetInput('');
-  };
-
-  // 预算输入格式化
-  const handleBudgetInputChange = (value: string) => {
-    const cleaned = value.replace(/[^\d.]/g, '');
-    const parts = cleaned.split('.');
-    if (parts.length > 2) return;
-    if (parts[1] && parts[1].length > 2) parts[1] = parts[1].slice(0, 2);
-    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    setBudgetInput(parts.length > 1 ? intPart + '.' + parts[1] : intPart);
   };
 
   // 删除记录

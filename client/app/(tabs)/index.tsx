@@ -36,9 +36,9 @@ export default function AddRecordPage() {
     if (parts[1] && parts[1].length > 2) {
       parts[1] = parts[1].slice(0, 2);
     }
-    // 整数部分限制 999999
-    if (parts[0].length > 6) {
-      parts[0] = parts[0].slice(0, 6);
+    // 整数部分限制 9999999
+    if (parts[0].length > 7) {
+      parts[0] = parts[0].slice(0, 7);
     }
     // 加千分位
     const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -50,7 +50,7 @@ export default function AddRecordPage() {
     const rawValue = value.replace(/,/g, '');
     // 限制最大金额 999999
     const numValue = parseFloat(rawValue);
-    if (rawValue && numValue > 999999) return;
+    if (rawValue && numValue > 9999999) return;
     setAmount(rawValue);
   };
 
