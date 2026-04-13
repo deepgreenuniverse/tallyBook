@@ -60,7 +60,8 @@ export default function StatsPage() {
 
   // 设置预算
   const handleSetBudget = async () => {
-    const num = parseFloat(budgetInput);
+    // 去掉千分位符号后解析
+    const num = parseFloat(budgetInput.replace(/,/g, ''));
     if (!num || num <= 0) {
       Alert.alert('提示', '请输入有效金额');
       return;
@@ -69,6 +70,16 @@ export default function StatsPage() {
     setBudget(num);
     setShowBudgetModal(false);
     setBudgetInput('');
+  };
+
+  // 预算输入格式化
+  const handleBudgetInputChange = (value: string) => {
+    const cleaned = value.replace(/[^\d.]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) return;
+    if (parts[1] && parts[1].length > 2) parts[1] = parts[1].slice(0, 2);
+    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    setBudgetInput(parts.length > 1 ? intPart + '.' + parts[1] : intPart);
   };
 
   // 删除记录
@@ -198,39 +209,36 @@ export default function StatsPage() {
 
       {/* 预算弹窗 */}
       <Modal visible={showBudgetModal} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowBudgetModal(false)}>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <TouchableOpacity activeOpacity={1}>
-              <View style={styles.modalCard}>
-                <BlurView intensity={40} tint="dark" style={styles.modalBlur}>
-                  <Text style={styles.modalTitle}>设置预算</Text>
-                  <View style={styles.modalInput}>
-                    <Text style={styles.modalCurrency}>¥</Text>
-                    <TextInput
-                      style={styles.modalInputField}
-                      placeholder="输入预算"
-                      placeholderTextColor="rgba(255,255,255,0.4)"
-                      keyboardType="decimal-pad"
-                      value={budgetInput}
-                      onChangeText={setBudgetInput}
-                      autoFocus
-                    />
-                  </View>
-                  <View style={styles.modalBtns}>
-                    <TouchableOpacity style={styles.modalCancel} onPress={() => setShowBudgetModal(false)}>
-                      <Text style={styles.modalCancelText}>取消</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
-                      <LinearGradient colors={['#E94560', '#FF6B6B']} style={styles.modalConfirmGrad}>
-                        <Text style={styles.modalConfirmText}>确定</Text>
-                      </LinearGradient>
-                    </TouchableOpacity>
-                  </View>
-                </BlurView>
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity style={styles.modalBackdrop} onPress={() => setShowBudgetModal(false)} />
+          <View style={styles.modalCard}>
+            <BlurView intensity={40} tint="dark" style={styles.modalBlur}>
+              <Text style={styles.modalTitle}>设置预算</Text>
+              <View style={styles.modalInputWrapper}>
+                <Text style={styles.modalCurrency}>¥</Text>
+                <TextInput
+                  style={styles.modalInputField}
+                  placeholder="0.00"
+                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  keyboardType="decimal-pad"
+                  value={budgetInput}
+                  onChangeText={handleBudgetInputChange}
+                  autoFocus
+                />
               </View>
-            </TouchableOpacity>
-          </KeyboardAvoidingView>
-        </TouchableOpacity>
+              <View style={styles.modalBtns}>
+                <TouchableOpacity style={styles.modalCancel} onPress={() => setShowBudgetModal(false)}>
+                  <Text style={styles.modalCancelText}>取消</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
+                  <LinearGradient colors={['#E94560', '#FF6B6B']} style={styles.modalConfirmGrad}>
+                    <Text style={styles.modalConfirmText}>确定</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </BlurView>
+          </View>
+        </View>
       </Modal>
     </Screen>
   );
@@ -278,17 +286,26 @@ const styles = StyleSheet.create({
   recordRight: { alignItems: 'flex-end' },
   recordAmount: { fontSize: 14, fontWeight: '600', color: '#FF6B6B' },
   recordDate: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 30 },
-  modalCard: { width: '100%', borderRadius: 20, overflow: 'hidden' },
   modalBlur: { padding: 28 },
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#FFF', textAlign: 'center', marginBottom: 24 },
-  modalInput: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 14, paddingHorizontal: 18, marginBottom: 24 },
+  modalInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 24,
+  },
   modalCurrency: { fontSize: 28, color: 'rgba(255,255,255,0.5)', marginRight: 8 },
-  modalInputField: { flex: 1, fontSize: 32, fontWeight: '600', color: '#FFF', paddingVertical: 18 },
+  modalInputField: { flex: 1, fontSize: 28, fontWeight: '600', color: '#FFF', paddingVertical: 12, letterSpacing: 1 },
   modalBtns: { flexDirection: 'row', gap: 12 },
   modalCancel: { flex: 1, paddingVertical: 14, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12 },
   modalCancelText: { fontSize: 16, fontWeight: '600', color: 'rgba(255,255,255,0.7)' },
   modalConfirm: { flex: 1, borderRadius: 12, overflow: 'hidden' },
   modalConfirmGrad: { paddingVertical: 14, alignItems: 'center' },
   modalConfirmText: { fontSize: 16, fontWeight: '600', color: '#FFF' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalBackdrop: { ...StyleSheet.absoluteFillObject },
+  modalCard: { width: '100%', maxWidth: 340, borderRadius: 20, overflow: 'hidden' },
 });
