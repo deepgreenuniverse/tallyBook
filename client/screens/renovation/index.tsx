@@ -178,6 +178,15 @@ export default function RenovationPage() {
             </TouchableOpacity>
           </View>
 
+          {/* 总支出汇总 */}
+          <View style={styles.totalCard}>
+            <BlurView intensity={40} tint="dark" style={styles.totalBlur}>
+              <Text style={styles.totalLabel}>累计支出</Text>
+              <Text style={styles.totalValue}>¥{formatAmount(totalExpense)}</Text>
+              <Text style={styles.totalCount}>{records.length} 笔支出</Text>
+            </BlurView>
+          </View>
+
           {/* 总预算卡片 */}
           {budget > 0 && (
             <View style={styles.budgetCard}>
@@ -555,6 +564,33 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // 总支出汇总
+  totalCard: {
+    marginHorizontal: 20,
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  totalBlur: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  totalLabel: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.6)',
+    marginBottom: 8,
+  },
+  totalValue: {
+    fontSize: 42,
+    fontWeight: '700',
+    color: '#FF6B6B',
+    letterSpacing: -1,
+  },
+  totalCount: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.4)',
+    marginTop: 6,
   },
   // 预算卡片
   budgetCard: {
