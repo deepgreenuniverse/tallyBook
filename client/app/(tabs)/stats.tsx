@@ -99,7 +99,11 @@ export default function StatsPage() {
   const formatAmount = (num: number) => num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const formatDate = (str: string) => {
     const d = new Date(str);
-    return `${d.getMonth() + 1}/${d.getDate()}`;
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    const hour = d.getHours().toString().padStart(2, '0');
+    const min = d.getMinutes().toString().padStart(2, '0');
+    return `${month}/${day} ${hour}:${min}`;
   };
 
   return (
