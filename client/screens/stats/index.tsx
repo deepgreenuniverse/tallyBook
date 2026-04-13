@@ -224,7 +224,7 @@ export default function StatsPage() {
       <Modal visible={showBudgetModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={styles.modalBackdrop} onPress={() => setShowBudgetModal(false)} />
-          <View style={[styles.modalCardContent, { backgroundColor: colors.cardBg }]}>
+          <View style={[styles.modalCardContent, { backgroundColor: colors.modalBg }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>设置预算</Text>
             <View style={[styles.modalInputWrapper, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
               <Text style={[styles.modalCurrency, { color: colors.textMuted }]}>¥</Text>

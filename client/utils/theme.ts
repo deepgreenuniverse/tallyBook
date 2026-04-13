@@ -28,6 +28,9 @@ export interface ThemeColors {
   // Tab Bar
   tabBarBg: string;
   tabBarBorder: string;
+  
+  // 弹窗
+  modalBg: string;
 }
 
 export const lightTheme: ThemeColors = {
@@ -50,6 +53,8 @@ export const lightTheme: ThemeColors = {
   
   tabBarBg: '#FFFFFF',
   tabBarBorder: '#E0E0E0',
+  
+  modalBg: '#FFFFFF',
 };
 
 export const darkTheme: ThemeColors = {
@@ -72,6 +77,8 @@ export const darkTheme: ThemeColors = {
   
   tabBarBg: '#1A1A2E',
   tabBarBorder: 'rgba(255,255,255,0.08)',
+  
+  modalBg: '#2A2A42',
 };
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
