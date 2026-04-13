@@ -20,35 +20,24 @@ import { StorageService, RENOVATION_CATEGORIES } from '@/utils/renovation';
 export default function AddRecordPage() {
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [detail, setDetail] = useState('');
+  const [location, setLocation] = useState('');
 
   const currentCategory = RENOVATION_CATEGORIES.find((c) => c.id === selectedCategory);
 
   // 格式化金额（加千分位）
   const formatAmountInput = (value: string) => {
-    // 移除非数字和小数点
     const cleaned = value.replace(/[^\d.]/g, '');
-    // 只保留一个小数点
     const parts = cleaned.split('.');
-    if (parts.length > 2) {
-      return parts[0] + '.' + parts.slice(1).join('');
-    }
-    // 小数点后最多2位
-    if (parts[1] && parts[1].length > 2) {
-      parts[1] = parts[1].slice(0, 2);
-    }
-    // 整数部分限制 9999999
-    if (parts[0].length > 7) {
-      parts[0] = parts[0].slice(0, 7);
-    }
-    // 加千分位
+    if (parts.length > 2) return parts[0] + '.' + parts.slice(1).join('');
+    if (parts[1] && parts[1].length > 2) parts[1] = parts[1].slice(0, 2);
+    if (parts[0].length > 7) parts[0] = parts[0].slice(0, 7);
     const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return parts.length > 1 ? intPart + '.' + parts[1] : intPart;
   };
 
   const handleAmountChange = (value: string) => {
-    // 去掉分隔符，只保留原始数字
     const rawValue = value.replace(/,/g, '');
-    // 限制最大金额 999999
     const numValue = parseFloat(rawValue);
     if (rawValue && numValue > 9999999) return;
     setAmount(rawValue);
@@ -65,14 +54,16 @@ export default function AddRecordPage() {
     await StorageService.addRecord({
       amount: numAmount,
       category: selectedCategory || 'other',
-      subCategory: currentCategory?.subCategories[0] || '其他',
-      room: '全屋',
+      subCategory: detail.trim() || '其他',
+      room: location.trim() || '全屋',
       note: '',
       date: new Date().toISOString(),
     });
 
     setAmount('');
     setSelectedCategory('');
+    setDetail('');
+    setLocation('');
     Toast.show({ type: 'success', text1: '已记录' });
   };
 
@@ -129,33 +120,33 @@ export default function AddRecordPage() {
             </View>
           </View>
 
-          {/* 细分类目（选中类别后显示） */}
-          {currentCategory && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>细项（可选）</Text>
-              <View style={styles.subGrid}>
-                {currentCategory.subCategories.map((sub, idx) => (
-                  <Pressable key={sub} style={styles.subItem}>
-                    <Text style={styles.subText}>{sub}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          )}
+          {/* 细项 */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>细项（可选，限20字）</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="如：瓷砖、水电人工..."
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              value={detail}
+              onChangeText={(v) => setDetail(v.slice(0, 20))}
+              maxLength={20}
+            />
+            <Text style={styles.charCount}>{detail.length}/20</Text>
+          </View>
 
-          {/* 空间（选中类别后显示） */}
-          {currentCategory && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>空间（可选）</Text>
-              <View style={styles.roomGrid}>
-                {['全屋', '客厅', '卧室', '厨房', '卫生间', '阳台'].map((room) => (
-                  <Pressable key={room} style={styles.roomItem}>
-                    <Text style={styles.roomText}>{room}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          )}
+          {/* 空间 */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>空间（可选，限20字）</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="如：客厅、主卧..."
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              value={location}
+              onChangeText={(v) => setLocation(v.slice(0, 20))}
+              maxLength={20}
+            />
+            <Text style={styles.charCount}>{location.length}/20</Text>
+          </View>
 
           {/* 提交 */}
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
@@ -180,7 +171,7 @@ const styles = StyleSheet.create({
   currency: { fontSize: 32, color: 'rgba(255,255,255,0.5)', marginRight: 8 },
   amountInput: { fontSize: 48, fontWeight: '700', color: '#FFF', minWidth: 200, textAlign: 'center', letterSpacing: 2 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 12 },
+  sectionTitle: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 10 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   categoryItem: {
     flexDirection: 'row',
@@ -194,26 +185,16 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
   },
   categoryText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
-  subGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  subItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 8,
+  textInput: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 15,
+    color: '#FFF',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  subText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
-  roomGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  roomItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  roomText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
+  charCount: { fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'right', marginTop: 6 },
   submitBtn: { borderRadius: 14, overflow: 'hidden', marginTop: 16 },
   submitGradient: { paddingVertical: 16, alignItems: 'center' },
   submitText: { fontSize: 17, fontWeight: '700', color: '#FFF' },
