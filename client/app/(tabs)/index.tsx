@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   Pressable,
   KeyboardAvoidingView,
   Platform,
@@ -14,46 +13,60 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import { Screen } from '@/components/Screen';
-import { StorageService, RenovationRecord, RENOVATION_CATEGORIES, ROOMS, getCategoryInfo } from '@/utils/renovation';
+import { StorageService, RENOVATION_CATEGORIES } from '@/utils/renovation';
 
 export default function AddRecordPage() {
   const [amount, setAmount] = useState('');
-  const [note, setNote] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedSubCategory, setSelectedSubCategory] = useState('');
-  const [selectedRoom, setSelectedRoom] = useState('');
 
   const currentCategory = RENOVATION_CATEGORIES.find((c) => c.id === selectedCategory);
+
+  // 格式化金额（加千分位）
+  const formatAmountInput = (value: string) => {
+    // 移除非数字和小数点
+    const cleaned = value.replace(/[^\d.]/g, '');
+    // 只保留一个小数点
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      return parts[0] + '.' + parts.slice(1).join('');
+    }
+    // 小数点后最多2位
+    if (parts[1] && parts[1].length > 2) {
+      parts[1] = parts[1].slice(0, 2);
+    }
+    // 加千分位
+    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.length > 1 ? intPart + '.' + parts[1] : intPart;
+  };
+
+  const handleAmountChange = (value: string) => {
+    // 去掉分隔符，只保留原始数字
+    const rawValue = value.replace(/,/g, '');
+    setAmount(rawValue);
+  };
 
   // 提交记录
   const handleSubmit = async () => {
     const numAmount = parseFloat(amount);
     if (!numAmount || numAmount <= 0) {
-      Alert.alert('提示', '请输入金额');
-      return;
-    }
-    if (!selectedCategory || !selectedSubCategory || !selectedRoom) {
-      Alert.alert('提示', '请完善信息');
+      Toast.show({ type: 'error', text1: '请输入金额' });
       return;
     }
 
     await StorageService.addRecord({
       amount: numAmount,
-      category: selectedCategory,
-      subCategory: selectedSubCategory,
-      room: selectedRoom,
-      note: note.trim(),
+      category: selectedCategory || 'other',
+      subCategory: currentCategory?.subCategories[0] || '其他',
+      room: '全屋',
+      note: '',
       date: new Date().toISOString(),
     });
 
-    // 重置表单
     setAmount('');
-    setNote('');
     setSelectedCategory('');
-    setSelectedSubCategory('');
-    setSelectedRoom('');
-    Alert.alert('成功', '已记录这笔支出');
+    Toast.show({ type: 'success', text1: '已记录' });
   };
 
   return (
@@ -61,7 +74,7 @@ export default function AddRecordPage() {
       <LinearGradient colors={['#1A1A2E', '#16213E', '#0F3460']} style={StyleSheet.absoluteFill} />
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {/* 标题 */}
           <Text style={styles.title}>记一笔</Text>
 
@@ -73,10 +86,11 @@ export default function AddRecordPage() {
                 <TextInput
                   style={styles.amountInput}
                   placeholder="0.00"
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor="rgba(255,255,255,0.2)"
                   keyboardType="decimal-pad"
-                  value={amount}
-                  onChangeText={setAmount}
+                  value={formatAmountInput(amount)}
+                  onChangeText={handleAmountChange}
+                  autoFocus
                 />
               </View>
             </BlurView>
@@ -84,7 +98,7 @@ export default function AddRecordPage() {
 
           {/* 类别 */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>类别</Text>
+            <Text style={styles.sectionTitle}>类别（可选）</Text>
             <View style={styles.categoryGrid}>
               {RENOVATION_CATEGORIES.map((cat) => (
                 <Pressable
@@ -93,10 +107,7 @@ export default function AddRecordPage() {
                     styles.categoryItem,
                     selectedCategory === cat.id && { borderColor: cat.color, backgroundColor: `${cat.color}15` },
                   ]}
-                  onPress={() => {
-                    setSelectedCategory(cat.id);
-                    setSelectedSubCategory('');
-                  }}
+                  onPress={() => setSelectedCategory(selectedCategory === cat.id ? '' : cat.id)}
                 >
                   <Ionicons
                     name={cat.icon as any}
@@ -111,50 +122,33 @@ export default function AddRecordPage() {
             </View>
           </View>
 
-          {/* 细分类目 */}
+          {/* 细分类目（选中类别后显示） */}
           {currentCategory && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>细项</Text>
+              <Text style={styles.sectionTitle}>细项（可选）</Text>
               <View style={styles.subGrid}>
-                {currentCategory.subCategories.map((sub) => (
-                  <Pressable
-                    key={sub}
-                    style={[styles.subItem, selectedSubCategory === sub && styles.subItemActive]}
-                    onPress={() => setSelectedSubCategory(sub)}
-                  >
-                    <Text style={[styles.subText, selectedSubCategory === sub && styles.subTextActive]}>
-                      {sub}
-                    </Text>
+                {currentCategory.subCategories.map((sub, idx) => (
+                  <Pressable key={sub} style={styles.subItem}>
+                    <Text style={styles.subText}>{sub}</Text>
                   </Pressable>
                 ))}
               </View>
             </View>
           )}
 
-          {/* 空间 */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>空间</Text>
-            <View style={styles.roomGrid}>
-              {ROOMS.map((room) => (
-                <Pressable
-                  key={room}
-                  style={[styles.roomItem, selectedRoom === room && styles.roomItemActive]}
-                  onPress={() => setSelectedRoom(room)}
-                >
-                  <Text style={[styles.roomText, selectedRoom === room && styles.roomTextActive]}>{room}</Text>
-                </Pressable>
-              ))}
+          {/* 空间（选中类别后显示） */}
+          {currentCategory && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>空间（可选）</Text>
+              <View style={styles.roomGrid}>
+                {['全屋', '客厅', '卧室', '厨房', '卫生间', '阳台'].map((room) => (
+                  <Pressable key={room} style={styles.roomItem}>
+                    <Text style={styles.roomText}>{room}</Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
-          </View>
-
-          {/* 备注 */}
-          <TextInput
-            style={styles.noteInput}
-            placeholder="备注（可选）"
-            placeholderTextColor="rgba(255,255,255,0.4)"
-            value={note}
-            onChangeText={setNote}
-          />
+          )}
 
           {/* 提交 */}
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
@@ -173,12 +167,12 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: 20, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '700', color: '#FFF', marginTop: 60, marginBottom: 24 },
-  amountCard: { borderRadius: 16, overflow: 'hidden', marginBottom: 24 },
-  amountBlur: { padding: 20 },
+  amountCard: { borderRadius: 16, overflow: 'hidden', marginBottom: 32 },
+  amountBlur: { padding: 24 },
   amountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   currency: { fontSize: 32, color: 'rgba(255,255,255,0.5)', marginRight: 8 },
-  amountInput: { fontSize: 48, fontWeight: '700', color: '#FFF', minWidth: 160, textAlign: 'center' },
-  section: { marginBottom: 20 },
+  amountInput: { fontSize: 48, fontWeight: '700', color: '#FFF', minWidth: 200, textAlign: 'center', letterSpacing: 2 },
+  section: { marginBottom: 24 },
   sectionTitle: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 12 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   categoryItem: {
@@ -202,9 +196,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  subItemActive: { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)' },
   subText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
-  subTextActive: { color: '#FFF' },
   roomGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   roomItem: {
     paddingVertical: 8,
@@ -214,18 +206,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  roomItemActive: { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)' },
   roomText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
-  roomTextActive: { color: '#FFF' },
-  noteInput: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
-    color: '#FFF',
-    marginBottom: 24,
-  },
-  submitBtn: { borderRadius: 14, overflow: 'hidden' },
+  submitBtn: { borderRadius: 14, overflow: 'hidden', marginTop: 16 },
   submitGradient: { paddingVertical: 16, alignItems: 'center' },
   submitText: { fontSize: 17, fontWeight: '700', color: '#FFF' },
 });
