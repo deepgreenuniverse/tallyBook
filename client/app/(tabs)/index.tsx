@@ -15,13 +15,12 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { Screen } from '@/components/Screen';
-import { StorageService, RENOVATION_CATEGORIES, ROOMS } from '@/utils/renovation';
+import { StorageService, RENOVATION_CATEGORIES } from '@/utils/renovation';
 
 export default function AddRecordPage() {
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
-  const [selectedRoom, setSelectedRoom] = useState('');
   const [customNote, setCustomNote] = useState('');
 
   const currentCategory = RENOVATION_CATEGORIES.find((c) => c.id === selectedCategory);
@@ -56,7 +55,7 @@ export default function AddRecordPage() {
       amount: numAmount,
       category: selectedCategory || 'other',
       subCategory: selectedSubCategory || customNote || '其他',
-      room: selectedRoom || '全屋',
+      room: '',
       note: customNote,
       date: new Date().toISOString(),
     });
@@ -64,7 +63,6 @@ export default function AddRecordPage() {
     setAmount('');
     setSelectedCategory('');
     setSelectedSubCategory('');
-    setSelectedRoom('');
     setCustomNote('');
     Toast.show({ type: 'success', text1: '已记录' });
   };
@@ -145,24 +143,6 @@ export default function AddRecordPage() {
             </View>
           )}
 
-          {/* 空间 */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>空间（可选）</Text>
-            <View style={styles.roomGrid}>
-              {ROOMS.map((room) => (
-                <Pressable
-                  key={room}
-                  style={[styles.roomItem, selectedRoom === room && styles.roomItemActive]}
-                  onPress={() => setSelectedRoom(selectedRoom === room ? '' : room)}
-                >
-                  <Text style={[styles.roomText, selectedRoom === room && styles.roomTextActive]}>
-                    {room}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
           {/* 备注 */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>备注（可选，限20字）</Text>
@@ -226,18 +206,6 @@ const styles = StyleSheet.create({
   subItemActive: { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)' },
   subText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
   subTextActive: { color: '#FFF' },
-  roomGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  roomItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  roomItemActive: { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)' },
-  roomText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
-  roomTextActive: { color: '#FFF' },
   textInput: {
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 10,

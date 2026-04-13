@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,18 +25,21 @@ export default function StatsPage() {
   const [budgetInput, setBudgetInput] = useState('');
 
   // 加载数据
-  useEffect(() => {
-    const load = async () => {
-      const [data, savedBudget] = await Promise.all([
-        StorageService.getRecords(),
-        StorageService.getBudget(),
-      ]);
-      setRecords(data);
-      setBudget(savedBudget);
-    };
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadData = useCallback(async () => {
+    const [data, savedBudget] = await Promise.all([
+      StorageService.getRecords(),
+      StorageService.getBudget(),
+    ]);
+    setRecords(data);
+    setBudget(savedBudget);
   }, []);
+
+  // Tab 切换时刷新数据
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   // 统计数据
   const total = records.reduce((sum, r) => sum + r.amount, 0);
@@ -53,7 +57,6 @@ export default function StatsPage() {
     const cleaned = value.replace(/[^\d.]/g, '');
     const parts = cleaned.split('.');
     if (parts.length > 2) return;
-    // 限制整数部分 7 位（最大 9999999）
     if (parts[0].length > 7) return;
     if (parts[1] && parts[1].length > 2) parts[1] = parts[1].slice(0, 2);
     const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -62,7 +65,6 @@ export default function StatsPage() {
 
   // 设置预算
   const handleSetBudget = async () => {
-    // 去掉千分位符号后解析
     const num = parseFloat(budgetInput.replace(/,/g, ''));
     if (!num || num <= 0) {
       Alert.alert('提示', '请输入有效金额');
@@ -188,7 +190,7 @@ export default function StatsPage() {
                         </View>
                         <View style={styles.recordInfo}>
                           <Text style={styles.recordSub}>{record.subCategory}</Text>
-                          <Text style={styles.recordMeta}>{cat.name} · {record.room}</Text>
+                          <Text style={styles.recordMeta}>{cat.name}{record.note ? ` · ${record.note}` : ''}</Text>
                         </View>
                         <View style={styles.recordRight}>
                           <Text style={styles.recordAmount}>-¥{formatAmount(record.amount)}</Text>
@@ -285,15 +287,7 @@ const styles = StyleSheet.create({
   recordDate: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
   modalBlur: { padding: 28 },
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#FFF', textAlign: 'center', marginBottom: 24 },
-  modalInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 24,
-  },
+  modalInputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 8, marginBottom: 24 },
   modalCurrency: { fontSize: 28, color: 'rgba(255,255,255,0.5)', marginRight: 8 },
   modalInputField: { flex: 1, fontSize: 28, fontWeight: '600', color: '#FFF', paddingVertical: 12, letterSpacing: 1 },
   modalBtns: { flexDirection: 'row', gap: 12 },
