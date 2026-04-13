@@ -15,13 +15,14 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { Screen } from '@/components/Screen';
-import { StorageService, RENOVATION_CATEGORIES } from '@/utils/renovation';
+import { StorageService, RENOVATION_CATEGORIES, ROOMS } from '@/utils/renovation';
 
 export default function AddRecordPage() {
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [detail, setDetail] = useState('');
-  const [location, setLocation] = useState('');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('');
+  const [selectedRoom, setSelectedRoom] = useState('');
+  const [customNote, setCustomNote] = useState('');
 
   const currentCategory = RENOVATION_CATEGORIES.find((c) => c.id === selectedCategory);
 
@@ -54,16 +55,17 @@ export default function AddRecordPage() {
     await StorageService.addRecord({
       amount: numAmount,
       category: selectedCategory || 'other',
-      subCategory: detail.trim() || '其他',
-      room: location.trim() || '全屋',
-      note: '',
+      subCategory: selectedSubCategory || customNote || '其他',
+      room: selectedRoom || '全屋',
+      note: customNote,
       date: new Date().toISOString(),
     });
 
     setAmount('');
     setSelectedCategory('');
-    setDetail('');
-    setLocation('');
+    setSelectedSubCategory('');
+    setSelectedRoom('');
+    setCustomNote('');
     Toast.show({ type: 'success', text1: '已记录' });
   };
 
@@ -105,7 +107,10 @@ export default function AddRecordPage() {
                     styles.categoryItem,
                     selectedCategory === cat.id && { borderColor: cat.color, backgroundColor: `${cat.color}15` },
                   ]}
-                  onPress={() => setSelectedCategory(selectedCategory === cat.id ? '' : cat.id)}
+                  onPress={() => {
+                    setSelectedCategory(selectedCategory === cat.id ? '' : cat.id);
+                    setSelectedSubCategory('');
+                  }}
                 >
                   <Ionicons
                     name={cat.icon as any}
@@ -120,32 +125,56 @@ export default function AddRecordPage() {
             </View>
           </View>
 
-          {/* 细项 */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>细项（可选，限20字）</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="如：瓷砖、水电人工..."
-              placeholderTextColor="rgba(255,255,255,0.3)"
-              value={detail}
-              onChangeText={(v) => setDetail(v.slice(0, 20))}
-              maxLength={20}
-            />
-            <Text style={styles.charCount}>{detail.length}/20</Text>
-          </View>
+          {/* 细项（选中类别后显示） */}
+          {currentCategory && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>细项（可选）</Text>
+              <View style={styles.subGrid}>
+                {currentCategory.subCategories.map((sub) => (
+                  <Pressable
+                    key={sub}
+                    style={[styles.subItem, selectedSubCategory === sub && styles.subItemActive]}
+                    onPress={() => setSelectedSubCategory(selectedSubCategory === sub ? '' : sub)}
+                  >
+                    <Text style={[styles.subText, selectedSubCategory === sub && styles.subTextActive]}>
+                      {sub}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          )}
 
           {/* 空间 */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>空间（可选，限20字）</Text>
+            <Text style={styles.sectionTitle}>空间（可选）</Text>
+            <View style={styles.roomGrid}>
+              {ROOMS.map((room) => (
+                <Pressable
+                  key={room}
+                  style={[styles.roomItem, selectedRoom === room && styles.roomItemActive]}
+                  onPress={() => setSelectedRoom(selectedRoom === room ? '' : room)}
+                >
+                  <Text style={[styles.roomText, selectedRoom === room && styles.roomTextActive]}>
+                    {room}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {/* 备注 */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>备注（可选，限20字）</Text>
             <TextInput
               style={styles.textInput}
-              placeholder="如：客厅、主卧..."
+              placeholder="补充说明..."
               placeholderTextColor="rgba(255,255,255,0.3)"
-              value={location}
-              onChangeText={(v) => setLocation(v.slice(0, 20))}
+              value={customNote}
+              onChangeText={(v) => setCustomNote(v.slice(0, 20))}
               maxLength={20}
             />
-            <Text style={styles.charCount}>{location.length}/20</Text>
+            <Text style={styles.charCount}>{customNote.length}/20</Text>
           </View>
 
           {/* 提交 */}
@@ -170,7 +199,7 @@ const styles = StyleSheet.create({
   amountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   currency: { fontSize: 32, color: 'rgba(255,255,255,0.5)', marginRight: 8 },
   amountInput: { fontSize: 48, fontWeight: '700', color: '#FFF', minWidth: 200, textAlign: 'center', letterSpacing: 2 },
-  section: { marginBottom: 24 },
+  section: { marginBottom: 20 },
   sectionTitle: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 10 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   categoryItem: {
@@ -185,6 +214,30 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
   },
   categoryText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
+  subGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  subItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  subItemActive: { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)' },
+  subText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
+  subTextActive: { color: '#FFF' },
+  roomGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  roomItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  roomItemActive: { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)' },
+  roomText: { fontSize: 13, color: 'rgba(255,255,255,0.6)' },
+  roomTextActive: { color: '#FFF' },
   textInput: {
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 10,
