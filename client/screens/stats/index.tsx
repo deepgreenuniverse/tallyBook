@@ -224,32 +224,30 @@ export default function StatsPage() {
       <Modal visible={showBudgetModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={styles.modalBackdrop} onPress={() => setShowBudgetModal(false)} />
-          <View style={styles.modalCard}>
-            <BlurView intensity={40} tint={theme} style={[styles.modalBlur, { backgroundColor: colors.cardBg }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>设置预算</Text>
-              <View style={[styles.modalInputWrapper, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
-                <Text style={[styles.modalCurrency, { color: colors.textMuted }]}>¥</Text>
-                <TextInput
-                  style={[styles.modalInputField, { color: colors.text }]}
-                  placeholder="0.00"
-                  placeholderTextColor={colors.textMuted}
-                  keyboardType="decimal-pad"
-                  value={budgetInput}
-                  onChangeText={handleBudgetInputChange}
-                  autoFocus
-                />
-              </View>
-              <View style={styles.modalBtns}>
-                <TouchableOpacity style={[styles.modalCancel, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]} onPress={() => setShowBudgetModal(false)}>
-                  <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
-                  <LinearGradient colors={['#E94560', '#FF6B6B']} style={styles.modalConfirmGrad}>
-                    <Text style={styles.modalConfirmText}>确定</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            </BlurView>
+          <View style={[styles.modalCardContent, { backgroundColor: colors.cardBg }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>设置预算</Text>
+            <View style={[styles.modalInputWrapper, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+              <Text style={[styles.modalCurrency, { color: colors.textMuted }]}>¥</Text>
+              <TextInput
+                style={[styles.modalInputField, { color: colors.text }]}
+                placeholder="0.00"
+                placeholderTextColor={colors.textMuted}
+                keyboardType="decimal-pad"
+                value={budgetInput}
+                onChangeText={handleBudgetInputChange}
+                autoFocus
+              />
+            </View>
+            <View style={styles.modalBtns}>
+              <TouchableOpacity style={[styles.modalCancel, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]} onPress={() => setShowBudgetModal(false)}>
+                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
+                <LinearGradient colors={['#E94560', '#FF6B6B']} style={styles.modalConfirmGrad}>
+                  <Text style={styles.modalConfirmText}>确定</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -314,5 +312,5 @@ const styles = StyleSheet.create({
   modalConfirmText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   modalBackdrop: { ...StyleSheet.absoluteFillObject },
-  modalCard: { width: '100%', maxWidth: 340, borderRadius: 20, overflow: 'hidden' },
+  modalCardContent: { width: '100%', maxWidth: 340, borderRadius: 20, padding: 28 },
 });
