@@ -198,7 +198,7 @@ export default function StatsPage() {
                 return (
                   <View key={record.id} style={styles.recordCard}>
                     <BlurView intensity={theme === 'dark' ? 20 : 10} tint={theme} style={[styles.recordBlur, { backgroundColor: colors.cardBg }]}>
-                      <TouchableOpacity style={styles.recordRow} onLongPress={() => handleDelete(record.id)}>
+                      <TouchableOpacity style={styles.recordRow} onLongPress={() => handleDelete(record.id)} onPress={() => handleDelete(record.id)}>
                         <View style={[styles.recordIcon, { backgroundColor: `${cat.color}20` }]}>
                           <Ionicons name={cat.icon as any} size={16} color={cat.color} />
                         </View>
@@ -210,6 +210,13 @@ export default function StatsPage() {
                           <Text style={[styles.recordAmount, { color: colors.danger }]}>-¥{formatAmount(record.amount)}</Text>
                           <Text style={[styles.recordDate, { color: colors.textMuted }]}>{formatDate(record.date)}</Text>
                         </View>
+                        <TouchableOpacity
+                          style={styles.deleteBtn}
+                          onPress={() => handleDelete(record.id)}
+                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                          <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                        </TouchableOpacity>
                       </TouchableOpacity>
                     </BlurView>
                   </View>
@@ -296,7 +303,8 @@ const styles = StyleSheet.create({
   recordInfo: { flex: 1, marginLeft: 10 },
   recordSub: { fontSize: 14, fontWeight: '600' },
   recordMeta: { fontSize: 11, marginTop: 2 },
-  recordRight: { alignItems: 'flex-end' },
+  recordRight: { alignItems: 'flex-end', flexDirection: 'row', gap: 12 },
+  deleteBtn: { padding: 4 },
   recordAmount: { fontSize: 14, fontWeight: '600' },
   recordDate: { fontSize: 11, marginTop: 2 },
   modalBlur: { padding: 28 },
