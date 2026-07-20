@@ -1,0 +1,4 @@
+name = "tallybook"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "./client/dist"
+account_id = "302fd1499e309f276a787b65c0dc2486"
