@@ -253,9 +253,12 @@ export default function StatsPage() {
                 style={[styles.modalCancel, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
                 onPress={() => setShowDeleteModal(false)}
               >
-                <Text style={[styles.modalCancelText, { color: colors.text }]}>取消</Text>
+                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalConfirm, { backgroundColor: colors.danger }]} onPress={handleDeleteConfirm}>
+              <TouchableOpacity
+                style={[styles.modalConfirm, { backgroundColor: colors.danger, paddingVertical: 14, alignItems: 'center', borderRadius: 12, overflow: 'hidden' }]}
+                onPress={handleDeleteConfirm}
+              >
                 <Text style={[styles.modalConfirmText, { color: '#FFF' }]}>删除</Text>
               </TouchableOpacity>
             </View>
