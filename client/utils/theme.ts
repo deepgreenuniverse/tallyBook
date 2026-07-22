@@ -58,8 +58,8 @@ export const lightTheme: ThemeColors = {
 };
 
 export const darkTheme: ThemeColors = {
-  background: '#1A1A2E',
-  backgroundSecondary: '#16213E',
+  background: '#121212',
+  backgroundSecondary: '#1C1C1E',
   
   text: '#FFFFFF',
   textSecondary: 'rgba(255,255,255,0.7)',
@@ -75,10 +75,10 @@ export const darkTheme: ThemeColors = {
   danger: '#FF6B6B',
   warning: '#FFA94D',
   
-  tabBarBg: '#1A1A2E',
+  tabBarBg: '#121212',
   tabBarBorder: 'rgba(255,255,255,0.08)',
   
-  modalBg: '#2A2A42',
+  modalBg: '#2C2C2E',
 };
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
