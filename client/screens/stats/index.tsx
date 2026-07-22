@@ -10,6 +10,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,6 +26,8 @@ export default function StatsPage() {
   const [budget, setBudget] = useState(0);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [budgetInput, setBudgetInput] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // 加载数据
   const loadData = useCallback(async () => {
@@ -83,19 +86,18 @@ export default function StatsPage() {
   };
 
   // 删除记录
-  const handleDelete = (id: string) => {
-    Alert.alert('删除', '确定删除？', [
-      { text: '取消', style: 'cancel' },
-      {
-        text: '删除',
-        style: 'destructive',
-        onPress: async () => {
-          await StorageService.deleteRecord(id);
-          const data = await StorageService.getRecords();
-          setRecords(data);
-        },
-      },
-    ]);
+  const handleDeletePress = (id: string) => {
+    setDeleteTargetId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
+    await StorageService.deleteRecord(deleteTargetId);
+    const data = await StorageService.getRecords();
+    setRecords(data);
+    setShowDeleteModal(false);
+    setDeleteTargetId(null);
   };
 
   const formatAmount = (num: number) => num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -197,27 +199,39 @@ export default function StatsPage() {
                 const cat = getCategoryInfo(record.category);
                 return (
                   <View key={record.id} style={styles.recordCard}>
-                    <BlurView intensity={theme === 'dark' ? 20 : 10} tint={theme} style={[styles.recordBlur, { backgroundColor: colors.cardBg }]}>
-                      <TouchableOpacity style={styles.recordRow} onLongPress={() => handleDelete(record.id)}>
-                        <View style={[styles.recordIcon, { backgroundColor: `${cat.color}20` }]}>
-                          <Ionicons name={cat.icon as any} size={16} color={cat.color} />
-                        </View>
-                        <View style={styles.recordInfo}>
-                          <Text style={[styles.recordSub, { color: colors.text }]}>{record.subCategory}</Text>
-                          <Text style={[styles.recordMeta, { color: colors.textMuted }]}>{cat.name}{record.note ? ` · ${record.note}` : ''}</Text>
-                        </View>
-                        <View style={styles.recordRight}>
-                          <Text style={[styles.recordAmount, { color: colors.danger }]}>-¥{formatAmount(record.amount)}</Text>
-                          <Text style={[styles.recordDate, { color: colors.textMuted }]}>{formatDate(record.date)}</Text>
-                        </View>
+                    <View style={styles.recordRow}>
+                      <TouchableOpacity
+                        style={[styles.recordRowTouch, { backgroundColor: colors.cardBg }]}
+                        onLongPress={() => handleDeletePress(record.id)}
+                        activeOpacity={0.8}
+                      >
+                        <BlurView intensity={theme === 'dark' ? 20 : 10} tint={theme} style={[styles.recordBlur, { backgroundColor: 'transparent' }]}>
+                          <View style={styles.recordInner}>
+                            <View style={[styles.recordIcon, { backgroundColor: `${cat.color}20` }]}>
+                              <Ionicons name={cat.icon as any} size={16} color={cat.color} />
+                            </View>
+                            <View style={styles.recordInfo}>
+                              <Text style={[styles.recordSub, { color: colors.text }]}>{record.subCategory}</Text>
+                              <Text style={[styles.recordMeta, { color: colors.textMuted }]}>{cat.name}{record.note ? ` · ${record.note}` : ''}</Text>
+                            </View>
+                            <View style={styles.recordRight}>
+                              <Text style={[styles.recordAmount, { color: colors.danger }]}>-¥{formatAmount(record.amount)}</Text>
+                              <Text style={[styles.recordDate, { color: colors.textMuted }]}>{formatDate(record.date)}</Text>
+                            </View>
+                          </View>
+                        </BlurView>
                       </TouchableOpacity>
-                    </BlurView>
-                    <TouchableOpacity
-                      style={styles.deleteBtn}
-                      onPress={() => handleDelete(record.id)}
+                    </View>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.deleteBtn,
+                        pressed && { opacity: 0.6 },
+                      ]}
+                      onPress={() => handleDeletePress(record.id)}
+                      hitSlop={8}
                     >
                       <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 );
               })
@@ -225,6 +239,29 @@ export default function StatsPage() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* 删除确认弹窗 */}
+      <Modal visible={showDeleteModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity style={styles.modalBackdrop} onPress={() => setShowDeleteModal(false)} />
+          <View style={[styles.modalCardContent, { backgroundColor: colors.modalBg }]}>
+            <Ionicons name="trash-outline" size={36} color={colors.danger} style={{ marginBottom: 12 }} />
+            <Text style={[styles.modalTitle, { color: colors.text }]}>删除记录</Text>
+            <Text style={[styles.modalDesc, { color: colors.textMuted }]}>确定要删除这条记录吗？此操作不可撤销。</Text>
+            <View style={styles.modalBtns}>
+              <TouchableOpacity
+                style={[styles.modalCancel, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text style={[styles.modalCancelText, { color: colors.text }]}>取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalConfirm, { backgroundColor: colors.danger }]} onPress={handleDeleteConfirm}>
+                <Text style={[styles.modalConfirmText, { color: '#FFF' }]}>删除</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* 预算弹窗 */}
       <Modal visible={showBudgetModal} transparent animationType="fade">
@@ -297,7 +334,9 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 14, marginTop: 12 },
   recordCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, overflow: 'hidden', marginBottom: 8 },
   recordBlur: { flex: 1, overflow: 'hidden', borderRadius: 12 },
-  recordRow: { flex: 1, flexDirection: 'row', alignItems: 'center', padding: 12 },
+  recordRow: { flex: 1, flexDirection: 'row', alignItems: 'center' },
+  recordRowTouch: { flex: 1, overflow: 'hidden', borderRadius: 12 },
+  recordInner: { flexDirection: 'row', alignItems: 'center', padding: 12 },
   recordIcon: { width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   recordInfo: { flex: 1, marginLeft: 10 },
   recordSub: { fontSize: 14, fontWeight: '600' },
@@ -307,7 +346,10 @@ const styles = StyleSheet.create({
   recordAmount: { fontSize: 14, fontWeight: '600' },
   recordDate: { fontSize: 11, marginTop: 2 },
   modalBlur: { padding: 28 },
+  modalCardContent: { padding: 28, borderRadius: 16 },
   modalTitle: { fontSize: 20, fontWeight: '700', textAlign: 'center', marginBottom: 24 },
+  modalDesc: { fontSize: 14, textAlign: 'center', marginBottom: 24, lineHeight: 20 },
+  modalBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   modalInputWrapper: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 8, marginBottom: 24 },
   modalCurrency: { fontSize: 28, marginRight: 8 },
   modalInputField: { flex: 1, fontSize: 28, fontWeight: '600', paddingVertical: 12, letterSpacing: 1 },
