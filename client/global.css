@@ -84,7 +84,7 @@
 
     @variant dark {
       /* Base Colors */
-      --background: #09090b;
+      --background: #121212;
       --foreground: var(--snow);
 
       /* Surface: Used for non-overlay components (cards, accordions, disclosure groups) */
