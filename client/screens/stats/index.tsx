@@ -363,6 +363,5 @@ const styles = StyleSheet.create({
   modalConfirmGrad: { paddingVertical: 14, alignItems: 'center' },
   modalConfirmText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
-  modalBackdrop: { ...StyleSheet.absoluteFillObject },
   modalCardContent: { width: '100%', maxWidth: 340, borderRadius: 20, padding: 28 },
 });
