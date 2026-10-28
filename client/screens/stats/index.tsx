@@ -195,7 +195,7 @@ export default function StatsPage() {
                 </BlurView>
               </View>
             ) : (
-              records.slice(0, 10).map((record) => {
+              records.map((record) => {
                 const cat = getCategoryInfo(record.category);
                 return (
                   <View key={record.id} style={styles.recordCard}>
