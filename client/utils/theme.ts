@@ -34,25 +34,25 @@ export interface ThemeColors {
 }
 
 export const lightTheme: ThemeColors = {
-  background: '#F5F6FA',
+  background: '#F8F6F0',
   backgroundSecondary: '#FFFFFF',
   
-  text: '#1A1A2E',
+  text: '#2D2D2D',
   textSecondary: '#666666',
   textMuted: '#999999',
   
-  cardBg: 'rgba(255,255,255,0.9)',
-  cardBorder: 'rgba(0,0,0,0.08)',
+  cardBg: 'rgba(255,255,255,0.95)',
+  cardBorder: 'rgba(0,0,0,0.06)',
   
-  primary: '#E94560',
-  primaryLight: 'rgba(233,69,96,0.15)',
+  primary: '#C8963E',
+  primaryLight: 'rgba(200,150,62,0.12)',
   
   success: '#4CAF50',
-  danger: '#FF5252',
-  warning: '#FFA726',
+  danger: '#E8553D',
+  warning: '#E8A840',
   
   tabBarBg: '#FFFFFF',
-  tabBarBorder: '#E0E0E0',
+  tabBarBorder: '#E8E4DA',
   
   modalBg: '#FFFFFF',
 };
@@ -68,12 +68,12 @@ export const darkTheme: ThemeColors = {
   cardBg: 'rgba(255,255,255,0.08)',
   cardBorder: 'rgba(255,255,255,0.12)',
   
-  primary: '#FF6B6B',
-  primaryLight: 'rgba(255,107,107,0.15)',
+  primary: '#D4A853',
+  primaryLight: 'rgba(212,168,83,0.15)',
   
   success: '#6BCB77',
-  danger: '#FF6B6B',
-  warning: '#FFA94D',
+  danger: '#E8553D',
+  warning: '#E8A840',
   
   tabBarBg: '#121212',
   tabBarBorder: 'rgba(255,255,255,0.08)',
@@ -89,9 +89,9 @@ export const ThemeService = {
   async getTheme(): Promise<ThemeMode> {
     try {
       const theme = await AsyncStorage.getItem(THEME_KEY);
-      return (theme as ThemeMode) || 'dark';
+      return (theme as ThemeMode) || 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   },
   

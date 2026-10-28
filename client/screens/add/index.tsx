@@ -72,7 +72,7 @@ export default function AddRecordPage() {
   return (
     <Screen style={{ backgroundColor: colors.background }}>
       <LinearGradient
-        colors={theme === 'dark' ? ['#1A1A2E', '#16213E', '#0F3460'] : ['#F5F6FA', '#FFFFFF', '#F0F0F5']}
+        colors={theme === 'dark' ? ['#1A1A2E', '#16213E', '#0F3460'] : ['#F8F6F0', '#FFFBF5', '#F5F0E8']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -169,7 +169,7 @@ export default function AddRecordPage() {
 
           {/* 提交 */}
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-            <LinearGradient colors={theme === 'dark' ? ['#E94560', '#FF6B6B'] : ['#E94560', '#FF7B7B']} style={styles.submitGradient}>
+            <LinearGradient colors={theme === 'dark' ? ['#C8963E', '#D4A853'] : ['#B8860B', '#D4A853']} style={styles.submitGradient}>
               <Text style={styles.submitText}>记录支出</Text>
             </LinearGradient>
           </TouchableOpacity>

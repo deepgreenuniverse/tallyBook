@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  Share,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +29,30 @@ export default function StatsPage() {
   const [budgetInput, setBudgetInput] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [monthFilter, setMonthFilter] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<RenovationRecord | null>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editNote, setEditNote] = useState('');
+
+  // 月份列表（从记录中提取）
+  const months = [...new Set(records.map((r) => r.date.slice(0, 7)))].sort().reverse();
+
+  // 按月份筛选
+  const filteredRecords = monthFilter
+    ? records.filter((r) => r.date.startsWith(monthFilter))
+    : records;
+
+  // 统计数据（基于筛选后）
+  const total = filteredRecords.reduce((sum, r) => sum + r.amount, 0);
+  const remaining = budget > 0 ? budget - total : 0;
+  const percent = budget > 0 ? Math.min((total / budget) * 100, 100) : 0;
+
+  // 按类别统计
+  const categoryStats = RENOVATION_CATEGORIES.map((cat) => ({
+    ...cat,
+    total: filteredRecords.filter((r) => r.category === cat.id).reduce((sum, r) => sum + r.amount, 0),
+  })).filter((c) => c.total > 0).sort((a, b) => b.total - a.total);
 
   // 加载数据
   const loadData = useCallback(async () => {
@@ -45,17 +70,6 @@ export default function StatsPage() {
       loadData();
     }, [loadData])
   );
-
-  // 统计数据
-  const total = records.reduce((sum, r) => sum + r.amount, 0);
-  const remaining = budget > 0 ? budget - total : 0;
-  const percent = budget > 0 ? Math.min((total / budget) * 100, 100) : 0;
-
-  // 按类别统计
-  const categoryStats = RENOVATION_CATEGORIES.map((cat) => ({
-    ...cat,
-    total: records.filter((r) => r.category === cat.id).reduce((sum, r) => sum + r.amount, 0),
-  })).filter((c) => c.total > 0).sort((a, b) => b.total - a.total);
 
   // 预算输入格式化
   const handleBudgetInputChange = (value: string) => {
@@ -100,6 +114,57 @@ export default function StatsPage() {
     setDeleteTargetId(null);
   };
 
+  // 编辑记录 - 点记录触发
+  const handleRecordPress = (record: RenovationRecord) => {
+    setEditingRecord(record);
+    setEditAmount(record.amount.toString());
+    setEditNote(record.note || '');
+    setShowEditModal(true);
+  };
+
+  // 确认编辑
+  const handleEditConfirm = async () => {
+    if (!editingRecord) return;
+    const num = parseFloat(editAmount);
+    if (!num || num <= 0) {
+      Alert.alert('提示', '请输入有效金额');
+      return;
+    }
+    await StorageService.updateRecord(editingRecord.id, {
+      amount: num,
+      note: editNote.slice(0, 20),
+    });
+    const data = await StorageService.getRecords();
+    setRecords(data);
+    setShowEditModal(false);
+    setEditingRecord(null);
+  };
+
+  // 分享
+  const handleShare = async () => {
+    const lines: string[] = [];
+    lines.push('📊 装修账单');
+    if (monthFilter) {
+      const [y, m] = monthFilter.split('-');
+      lines.push(`${y}年${parseInt(m)}月`);
+    }
+    lines.push(`累计支出：¥${formatAmount(total)}（${filteredRecords.length} 笔）`);
+    if (budget > 0) {
+      const r = budget - total;
+      lines.push(`预算：¥${formatAmount(budget)}  ${r >= 0 ? '剩余 ¥' + formatAmount(r) : '超支 ¥' + formatAmount(Math.abs(r))}`);
+    }
+    if (categoryStats.length > 0) {
+      lines.push('');
+      lines.push('分类支出：');
+      categoryStats.forEach((c) => {
+        lines.push(`  ${c.name}  ¥${formatAmount(c.total)}`);
+      });
+    }
+    try {
+      await Share.share({ message: lines.join('\n') });
+    } catch { /* user cancelled */ }
+  };
+
   const formatAmount = (num: number) => num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const formatDate = (str: string) => {
     const d = new Date(str);
@@ -110,10 +175,16 @@ export default function StatsPage() {
     return `${month}/${day} ${hour}:${min}`;
   };
 
+  // 月份显示名称
+  const monthLabel = (m: string) => {
+    const [y, mn] = m.split('-');
+    return `${y}年${parseInt(mn)}月`;
+  };
+
   return (
     <Screen style={{ backgroundColor: colors.background }}>
       <LinearGradient
-        colors={theme === 'dark' ? ['#1A1A2E', '#16213E', '#0F3460'] : ['#F5F6FA', '#FFFFFF', '#F0F0F5']}
+        colors={theme === 'dark' ? ['#1A1A2E', '#16213E', '#0F3460'] : ['#F8F6F0', '#FFFBF5', '#F5F0E8']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -123,6 +194,9 @@ export default function StatsPage() {
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>统计</Text>
             <View style={styles.headerBtns}>
+              <TouchableOpacity style={[styles.themeBtn, { backgroundColor: colors.cardBg }]} onPress={handleShare}>
+                <Ionicons name="share-outline" size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
               <TouchableOpacity style={[styles.themeBtn, { backgroundColor: colors.cardBg }]} onPress={toggleTheme}>
                 <Ionicons name={theme === 'dark' ? 'sunny' : 'moon'} size={20} color={colors.textSecondary} />
               </TouchableOpacity>
@@ -135,12 +209,35 @@ export default function StatsPage() {
             </View>
           </View>
 
+          {/* 月份筛选 */}
+          {months.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.monthBar} contentContainerStyle={styles.monthBarInner}>
+              <TouchableOpacity
+                style={[styles.monthChip, { backgroundColor: monthFilter === '' ? colors.primary : colors.cardBg }]}
+                onPress={() => setMonthFilter('')}
+              >
+                <Text style={[styles.monthChipText, { color: monthFilter === '' ? '#FFF' : colors.textSecondary }]}>全部</Text>
+              </TouchableOpacity>
+              {months.map((m) => (
+                <TouchableOpacity
+                  key={m}
+                  style={[styles.monthChip, { backgroundColor: monthFilter === m ? colors.primary : colors.cardBg }]}
+                  onPress={() => setMonthFilter(monthFilter === m ? '' : m)}
+                >
+                  <Text style={[styles.monthChipText, { color: monthFilter === m ? '#FFF' : colors.textSecondary }]}>{monthLabel(m)}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+
           {/* 总支出 */}
           <View style={styles.totalCard}>
             <BlurView intensity={theme === 'dark' ? 40 : 15} tint={theme} style={[styles.totalBlur, { backgroundColor: colors.cardBg }]}>
-              <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>累计支出</Text>
+              <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
+                {monthFilter ? `${monthLabel(monthFilter)} 支出` : '累计支出'}
+              </Text>
               <Text style={[styles.totalValue, { color: colors.danger }]}>¥{formatAmount(total)}</Text>
-              <Text style={[styles.totalCount, { color: colors.textMuted }]}>{records.length} 笔</Text>
+              <Text style={[styles.totalCount, { color: colors.textMuted }]}>{filteredRecords.length} 笔</Text>
             </BlurView>
           </View>
 
@@ -186,8 +283,8 @@ export default function StatsPage() {
 
           {/* 支出明细 */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>最近记录</Text>
-            {records.length === 0 ? (
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>记录明细</Text>
+            {filteredRecords.length === 0 ? (
               <View style={styles.emptyCard}>
                 <BlurView intensity={theme === 'dark' ? 20 : 10} tint={theme} style={[styles.emptyBlur, { backgroundColor: colors.cardBg }]}>
                   <Ionicons name="receipt-outline" size={40} color={colors.textMuted} />
@@ -195,13 +292,14 @@ export default function StatsPage() {
                 </BlurView>
               </View>
             ) : (
-              records.map((record) => {
+              filteredRecords.map((record) => {
                 const cat = getCategoryInfo(record.category);
                 return (
                   <View key={record.id} style={styles.recordCard}>
                     <View style={styles.recordRow}>
                       <TouchableOpacity
                         style={[styles.recordRowTouch, { backgroundColor: colors.cardBg }]}
+                        onPress={() => handleRecordPress(record)}
                         onLongPress={() => handleDeletePress(record.id)}
                         activeOpacity={0.8}
                       >
@@ -266,6 +364,46 @@ export default function StatsPage() {
         </View>
       </Modal>
 
+      {/* 编辑弹窗 */}
+      <Modal visible={showEditModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity style={styles.modalBackdrop} onPress={() => setShowEditModal(false)} />
+          <View style={[styles.modalCardContent, { backgroundColor: colors.modalBg }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>编辑记录</Text>
+            <Text style={[styles.editLabel, { color: colors.textMuted }]}>金额</Text>
+            <View style={[styles.editInputRow, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+              <Text style={[styles.modalCurrency, { color: colors.textMuted }]}>¥</Text>
+              <TextInput
+                style={[styles.editInput, { color: colors.text }]}
+                keyboardType="decimal-pad"
+                value={editAmount}
+                onChangeText={(v) => setEditAmount(v.replace(/[^\d.]/g, ''))}
+                autoFocus
+              />
+            </View>
+            <Text style={[styles.editLabel, { color: colors.textMuted, marginTop: 16 }]}>备注（限20字）</Text>
+            <TextInput
+              style={[styles.editNoteInput, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', color: colors.text, borderColor: colors.cardBorder }]}
+              value={editNote}
+              onChangeText={(v) => setEditNote(v.slice(0, 20))}
+              maxLength={20}
+              placeholder="补充说明..."
+              placeholderTextColor={colors.textMuted}
+            />
+            <View style={styles.modalBtns}>
+              <TouchableOpacity style={[styles.modalCancel, { backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]} onPress={() => setShowEditModal(false)}>
+                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirm} onPress={handleEditConfirm}>
+                <LinearGradient colors={['#C8963E', '#D4A853']} style={styles.modalConfirmGrad}>
+                  <Text style={styles.modalConfirmText}>保存</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* 预算弹窗 */}
       <Modal visible={showBudgetModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -289,7 +427,7 @@ export default function StatsPage() {
                 <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
-                <LinearGradient colors={['#E94560', '#FF6B6B']} style={styles.modalConfirmGrad}>
+                <LinearGradient colors={['#C8963E', '#D4A853']} style={styles.modalConfirmGrad}>
                   <Text style={styles.modalConfirmText}>确定</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -305,11 +443,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   flex: { flex: 1 },
   content: { padding: 20, paddingBottom: 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 60, marginBottom: 20 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 60, marginBottom: 12 },
   title: { fontSize: 28, fontWeight: '700' },
   headerBtns: { flexDirection: 'row', gap: 10 },
   themeBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   budgetBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  monthBar: { marginBottom: 16 },
+  monthBarInner: { gap: 8, paddingRight: 12 },
+  monthChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16 },
+  monthChipText: { fontSize: 13, fontWeight: '600' },
   totalCard: { borderRadius: 16, overflow: 'hidden', marginBottom: 16 },
   totalBlur: { padding: 24, alignItems: 'center' },
   totalLabel: { fontSize: 13, marginBottom: 8 },
@@ -356,12 +498,15 @@ const styles = StyleSheet.create({
   modalInputWrapper: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 8, marginBottom: 24 },
   modalCurrency: { fontSize: 28, marginRight: 8 },
   modalInputField: { flex: 1, fontSize: 28, fontWeight: '600', paddingVertical: 12, letterSpacing: 1 },
-  modalBtns: { flexDirection: 'row', gap: 12 },
+  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 24 },
   modalCancel: { flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 12 },
   modalCancelText: { fontSize: 16, fontWeight: '600' },
   modalConfirm: { flex: 1, borderRadius: 12, overflow: 'hidden' },
   modalConfirmGrad: { paddingVertical: 14, alignItems: 'center' },
   modalConfirmText: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
-  modalCardContent: { width: '100%', maxWidth: 340, borderRadius: 20, padding: 28 },
+  editLabel: { fontSize: 13, marginBottom: 8 },
+  editInputRow: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 4 },
+  editInput: { flex: 1, fontSize: 24, fontWeight: '600', paddingVertical: 10 },
+  editNoteInput: { borderRadius: 10, padding: 12, fontSize: 15, borderWidth: 1 },
 });

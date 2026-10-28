@@ -22,7 +22,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<ThemeMode>('dark');
+  const [theme, setThemeState] = useState<ThemeMode>('light');
 
   useEffect(() => {
     ThemeService.getTheme().then(setThemeState);

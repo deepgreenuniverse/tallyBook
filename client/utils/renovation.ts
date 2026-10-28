@@ -106,6 +106,15 @@ export const StorageService = {
     return newRecord;
   },
 
+  // 更新记录
+  async updateRecord(id: string, updates: Partial<RenovationRecord>): Promise<void> {
+    const records = await this.getRecords();
+    const idx = records.findIndex((r) => r.id === id);
+    if (idx === -1) return;
+    records[idx] = { ...records[idx], ...updates };
+    await this.saveRecords(records);
+  },
+
   // 删除记录
   async deleteRecord(id: string): Promise<void> {
     const records = await this.getRecords();
