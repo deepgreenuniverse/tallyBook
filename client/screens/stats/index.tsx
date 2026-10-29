@@ -11,12 +11,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  Share,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import { Screen } from '@/components/Screen';
 import { useTheme } from '@/contexts/ThemeContext';
 import { StorageService, RenovationRecord, RENOVATION_CATEGORIES, getCategoryInfo } from '@/utils/renovation';
@@ -143,7 +143,7 @@ export default function StatsPage() {
   // 分享（复制到剪贴板）
   const handleShare = async () => {
     const lines: string[] = [];
-    lines.push('📊 装修账单');
+    lines.push('\u{1F4CA} 装修账单');
     if (monthFilter) {
       const [y, m] = monthFilter.split('-');
       lines.push(`${y}年${parseInt(m)}月`);
@@ -162,14 +162,10 @@ export default function StatsPage() {
     }
     const text = lines.join('\n');
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(text);
-        Alert.alert('已复制', '账单摘要已复制到剪贴板，可粘贴到微信等应用分享');
-      } else {
-        await Share.share({ message: text });
-      }
+      await navigator.clipboard.writeText(text);
+      Toast.show({ type: 'success', text1: '已复制到剪贴板，可粘贴分享' });
     } catch {
-      try { await Share.share({ message: text }); } catch { /* cancelled */ }
+      Toast.show({ type: 'error', text1: '复制失败，请长按手动复制' });
     }
   };
 
@@ -192,7 +188,7 @@ export default function StatsPage() {
   return (
     <Screen style={{ backgroundColor: colors.background }}>
       <LinearGradient
-        colors={theme === 'dark' ? ['#121A0F', '#1C2418', '#162610'] : ['#F5F8F0', '#F0F5EA', '#E8F0DC']}
+        colors={theme === 'dark' ? ['#1A1814', '#1F1C16', '#242118'] : ['#FAF6F0', '#FFFDF8', '#F5F0E6']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -403,7 +399,7 @@ export default function StatsPage() {
                 <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirm} onPress={handleEditConfirm}>
-                <LinearGradient colors={['#689F38', '#8BC34A']} style={styles.modalConfirmGrad}>
+                <LinearGradient colors={['#7D8B5A', '#9CAF78']} style={styles.modalConfirmGrad}>
                   <Text style={styles.modalConfirmText}>保存</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -435,7 +431,7 @@ export default function StatsPage() {
                 <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
-                <LinearGradient colors={['#689F38', '#8BC34A']} style={styles.modalConfirmGrad}>
+                <LinearGradient colors={['#7D8B5A', '#9CAF78']} style={styles.modalConfirmGrad}>
                   <Text style={styles.modalConfirmText}>确定</Text>
                 </LinearGradient>
               </TouchableOpacity>

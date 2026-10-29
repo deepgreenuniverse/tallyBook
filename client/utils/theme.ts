@@ -34,51 +34,51 @@ export interface ThemeColors {
 }
 
 export const lightTheme: ThemeColors = {
-  background: '#F5F8F0',
-  backgroundSecondary: '#FFFFFF',
+  background: '#FAF6F0',
+  backgroundSecondary: '#FFFDF8',
   
-  text: '#2D3A1F',
-  textSecondary: '#5C6B4A',
-  textMuted: '#8B9A7A',
+  text: '#3D3222',
+  textSecondary: '#7A6E5E',
+  textMuted: '#A89B8C',
   
-  cardBg: 'rgba(255,255,255,0.92)',
-  cardBorder: 'rgba(0,0,0,0.06)',
+  cardBg: 'rgba(255,255,255,0.90)',
+  cardBorder: 'rgba(0,0,0,0.05)',
   
-  primary: '#7CB342',
-  primaryLight: 'rgba(124,179,66,0.12)',
+  primary: '#8D9B6A',
+  primaryLight: 'rgba(141,155,106,0.12)',
   
-  success: '#558B2F',
-  danger: '#E8553D',
-  warning: '#E8A840',
+  success: '#6B8E5A',
+  danger: '#D9684B',
+  warning: '#C4A86C',
   
   tabBarBg: '#FFFFFF',
-  tabBarBorder: '#DCE4D0',
+  tabBarBorder: '#E8E2D4',
   
   modalBg: '#FFFFFF',
 };
 
 export const darkTheme: ThemeColors = {
-  background: '#121A0F',
-  backgroundSecondary: '#1C2418',
+  background: '#1A1814',
+  backgroundSecondary: '#242118',
   
-  text: '#E8F0DC',
-  textSecondary: 'rgba(232,240,220,0.7)',
-  textMuted: 'rgba(232,240,220,0.4)',
+  text: '#EDE8DC',
+  textSecondary: 'rgba(237,232,220,0.7)',
+  textMuted: 'rgba(237,232,220,0.4)',
   
-  cardBg: 'rgba(255,255,255,0.06)',
-  cardBorder: 'rgba(255,255,255,0.10)',
+  cardBg: 'rgba(255,255,255,0.05)',
+  cardBorder: 'rgba(255,255,255,0.08)',
   
-  primary: '#8BC34A',
-  primaryLight: 'rgba(139,195,74,0.15)',
+  primary: '#9CAD78',
+  primaryLight: 'rgba(156,173,120,0.15)',
   
-  success: '#7CB342',
-  danger: '#E8553D',
-  warning: '#E8A840',
+  success: '#8D9B6A',
+  danger: '#D9684B',
+  warning: '#C4A86C',
   
-  tabBarBg: '#121A0F',
+  tabBarBg: '#1A1814',
   tabBarBorder: 'rgba(255,255,255,0.06)',
   
-  modalBg: '#222A1C',
+  modalBg: '#28251C',
 };
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
