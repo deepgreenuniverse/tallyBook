@@ -1,84 +1,71 @@
-// 主题配色方案
+// 主题配色方案 — 赛博/未来感
 
 export type ThemeMode = 'dark' | 'light';
 
 export interface ThemeColors {
-  // 背景
   background: string;
   backgroundSecondary: string;
-  
-  // 文字
   text: string;
   textSecondary: string;
   textMuted: string;
-  
-  // 卡片
   cardBg: string;
   cardBorder: string;
-  
-  // 主题色
   primary: string;
   primaryLight: string;
-  
-  // 状态色
   success: string;
   danger: string;
   warning: string;
-  
-  // Tab Bar
   tabBarBg: string;
   tabBarBorder: string;
-  
-  // 弹窗
   modalBg: string;
 }
 
-export const lightTheme: ThemeColors = {
-  background: '#FAF6F0',
-  backgroundSecondary: '#FFFDF8',
-  
-  text: '#3D3222',
-  textSecondary: '#7A6E5E',
-  textMuted: '#A89B8C',
-  
-  cardBg: 'rgba(255,255,255,0.90)',
-  cardBorder: 'rgba(0,0,0,0.05)',
-  
-  primary: '#8D9B6A',
-  primaryLight: 'rgba(141,155,106,0.12)',
-  
-  success: '#6B8E5A',
-  danger: '#D9684B',
-  warning: '#C4A86C',
-  
-  tabBarBg: '#FFFFFF',
-  tabBarBorder: '#E8E2D4',
-  
-  modalBg: '#FFFFFF',
+export const darkTheme: ThemeColors = {
+  background: '#0A0E1A',
+  backgroundSecondary: '#111627',
+
+  text: '#E8ECF4',
+  textSecondary: 'rgba(232,236,244,0.65)',
+  textMuted: 'rgba(232,236,244,0.35)',
+
+  cardBg: 'rgba(255,255,255,0.04)',
+  cardBorder: 'rgba(0,229,255,0.12)',
+
+  primary: '#00E5FF',
+  primaryLight: 'rgba(0,229,255,0.10)',
+
+  success: '#00E676',
+  danger: '#FF5252',
+  warning: '#FFD740',
+
+  tabBarBg: 'rgba(10,14,26,0.95)',
+  tabBarBorder: 'rgba(0,229,255,0.08)',
+
+  modalBg: '#141929',
 };
 
-export const darkTheme: ThemeColors = {
-  background: '#1A1814',
-  backgroundSecondary: '#242118',
-  
-  text: '#EDE8DC',
-  textSecondary: 'rgba(237,232,220,0.7)',
-  textMuted: 'rgba(237,232,220,0.4)',
-  
-  cardBg: 'rgba(255,255,255,0.05)',
-  cardBorder: 'rgba(255,255,255,0.08)',
-  
-  primary: '#9CAD78',
-  primaryLight: 'rgba(156,173,120,0.15)',
-  
-  success: '#8D9B6A',
-  danger: '#D9684B',
-  warning: '#C4A86C',
-  
-  tabBarBg: '#1A1814',
-  tabBarBorder: 'rgba(255,255,255,0.06)',
-  
-  modalBg: '#28251C',
+export const lightTheme: ThemeColors = {
+  background: '#F4F6FB',
+  backgroundSecondary: '#FFFFFF',
+
+  text: '#1A1D2E',
+  textSecondary: '#5A5E72',
+  textMuted: '#999DB5',
+
+  cardBg: 'rgba(255,255,255,0.88)',
+  cardBorder: 'rgba(0,102,255,0.10)',
+
+  primary: '#2266FF',
+  primaryLight: 'rgba(34,102,255,0.08)',
+
+  success: '#00C853',
+  danger: '#FF3D50',
+  warning: '#FF9100',
+
+  tabBarBg: '#FFFFFF',
+  tabBarBorder: '#E4E8F0',
+
+  modalBg: '#FFFFFF',
 };
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -89,12 +76,12 @@ export const ThemeService = {
   async getTheme(): Promise<ThemeMode> {
     try {
       const theme = await AsyncStorage.getItem(THEME_KEY);
-      return (theme as ThemeMode) || 'light';
+      return (theme as ThemeMode) || 'dark';
     } catch {
-      return 'light';
+      return 'dark';
     }
   },
-  
+
   async setTheme(theme: ThemeMode): Promise<void> {
     try {
       await AsyncStorage.setItem(THEME_KEY, theme);

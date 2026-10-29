@@ -188,7 +188,7 @@ export default function StatsPage() {
   return (
     <Screen style={{ backgroundColor: colors.background }}>
       <LinearGradient
-        colors={theme === 'dark' ? ['#1A1814', '#1F1C16', '#242118'] : ['#FAF6F0', '#FFFDF8', '#F5F0E6']}
+        colors={theme === 'dark' ? ['#0A0E1A', '#121830', '#0D1230'] : ['#F4F6FB', '#FAFBFF', '#EEF2FF']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -217,7 +217,7 @@ export default function StatsPage() {
           {months.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.monthBar} contentContainerStyle={styles.monthBarInner}>
               <TouchableOpacity
-                style={[styles.monthChip, { backgroundColor: monthFilter === '' ? colors.primary : colors.cardBg }]}
+                style={[styles.monthChip, monthFilter === '' ? [styles.monthChipActive, { backgroundColor: colors.primary }] : { backgroundColor: colors.cardBg }]}
                 onPress={() => setMonthFilter('')}
               >
                 <Text style={[styles.monthChipText, { color: monthFilter === '' ? '#FFF' : colors.textSecondary }]}>全部</Text>
@@ -225,7 +225,7 @@ export default function StatsPage() {
               {months.map((m) => (
                 <TouchableOpacity
                   key={m}
-                  style={[styles.monthChip, { backgroundColor: monthFilter === m ? colors.primary : colors.cardBg }]}
+                  style={[styles.monthChip, monthFilter === m ? [styles.monthChipActive, { backgroundColor: colors.primary }] : { backgroundColor: colors.cardBg }]}
                   onPress={() => setMonthFilter(monthFilter === m ? '' : m)}
                 >
                   <Text style={[styles.monthChipText, { color: monthFilter === m ? '#FFF' : colors.textSecondary }]}>{monthLabel(m)}</Text>
@@ -399,7 +399,7 @@ export default function StatsPage() {
                 <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirm} onPress={handleEditConfirm}>
-                <LinearGradient colors={['#7D8B5A', '#9CAF78']} style={styles.modalConfirmGrad}>
+                <LinearGradient colors={['#00B8D4', '#00E5FF']} style={styles.modalConfirmGrad}>
                   <Text style={styles.modalConfirmText}>保存</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -431,7 +431,7 @@ export default function StatsPage() {
                 <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
-                <LinearGradient colors={['#7D8B5A', '#9CAF78']} style={styles.modalConfirmGrad}>
+                <LinearGradient colors={['#00B8D4', '#00E5FF']} style={styles.modalConfirmGrad}>
                   <Text style={styles.modalConfirmText}>确定</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -454,7 +454,8 @@ const styles = StyleSheet.create({
   budgetBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   monthBar: { marginBottom: 16 },
   monthBarInner: { gap: 8, paddingRight: 12 },
-  monthChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16 },
+  monthChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16, borderWidth: 1, borderColor: 'transparent' },
+  monthChipActive: { borderColor: '#00E5FF' },
   monthChipText: { fontSize: 13, fontWeight: '600' },
   totalCard: { borderRadius: 16, overflow: 'hidden', marginBottom: 16 },
   totalBlur: { padding: 24, alignItems: 'center' },
