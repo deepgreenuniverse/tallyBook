@@ -12,6 +12,7 @@ import {
   Platform,
   Pressable,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -23,6 +24,7 @@ import { StorageService, RenovationRecord, RENOVATION_CATEGORIES, getCategoryInf
 
 export default function StatsPage() {
   const { colors, theme, toggleTheme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [records, setRecords] = useState<RenovationRecord[]>([]);
   const [budget, setBudget] = useState(0);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
@@ -193,7 +195,7 @@ export default function StatsPage() {
       />
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.flex} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 60 }]} showsVerticalScrollIndicator={false}>
           {/* 标题 */}
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>统计</Text>

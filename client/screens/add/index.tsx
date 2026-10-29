@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,7 @@ import { StorageService, RENOVATION_CATEGORIES } from '@/utils/renovation';
 
 export default function AddRecordPage() {
   const { colors, theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
@@ -77,7 +79,7 @@ export default function AddRecordPage() {
       />
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.flex} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 60 }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {/* 标题 */}
           <Text style={[styles.title, { color: colors.text }]}>记一笔</Text>
 
