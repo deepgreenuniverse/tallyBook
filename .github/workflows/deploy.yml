@@ -27,10 +27,13 @@ jobs:
         run: cd client && npx expo export --platform web
 
       - name: Deploy to Cloudflare Pages
+        id: deploy
         run: |
           npm install -g wrangler
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          wrangler pages deploy client/dist --project-name=tallybook --branch=$BRANCH
+          wrangler pages deploy client/dist --project-name=tallybook --branch=$BRANCH 2>&1 | tee /tmp/deploy.log
+          echo "## Deployment URL" >> $GITHUB_STEP_SUMMARY
+          grep -oP 'https://[a-z0-9]+\.tallybook\.pages\.dev' /tmp/deploy.log >> $GITHUB_STEP_SUMMARY || echo "URL not found in output" >> $GITHUB_STEP_SUMMARY
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
