@@ -32,8 +32,19 @@ jobs:
           npm install -g wrangler
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
           wrangler pages deploy client/dist --project-name=tallybook --branch=$BRANCH 2>&1 | tee /tmp/deploy.log
-          echo "## Deployment URL" >> $GITHUB_STEP_SUMMARY
-          grep -oP 'https://[a-z0-9]+\.tallybook\.pages\.dev' /tmp/deploy.log >> $GITHUB_STEP_SUMMARY || echo "URL not found in output" >> $GITHUB_STEP_SUMMARY
+          URL=$(grep -oP 'https://[a-z0-9]+\.tallybook\.pages\.dev' /tmp/deploy.log || echo "not-found")
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "## Preview URL" >> $GITHUB_STEP_SUMMARY
+          echo "$URL" >> $GITHUB_STEP_SUMMARY
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Upload preview URL
+        run: echo "${{ steps.deploy.outputs.url }}" > preview-url.txt
+
+      - name: Upload URL as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-url
+          path: preview-url.txt
