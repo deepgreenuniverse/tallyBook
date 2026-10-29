@@ -188,7 +188,7 @@ export default function StatsPage() {
   return (
     <Screen style={{ backgroundColor: colors.background }}>
       <LinearGradient
-        colors={theme === 'dark' ? ['#0A0E1A', '#121830', '#0D1230'] : ['#F4F6FB', '#FAFBFF', '#EEF2FF']}
+        colors={theme === 'dark' ? ['#080B1A', '#141B40', '#0C1035'] : ['#F4F6FB', '#FAFBFF', '#EEF2FF']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -236,19 +236,29 @@ export default function StatsPage() {
 
           {/* 总支出 */}
           <View style={styles.totalCard}>
-            <BlurView intensity={theme === 'dark' ? 40 : 15} tint={theme} style={[styles.totalBlur, { backgroundColor: colors.cardBg }]}>
-              <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
-                {monthFilter ? `${monthLabel(monthFilter)} 支出` : '累计支出'}
-              </Text>
-              <Text style={[styles.totalValue, { color: colors.danger }]}>¥{formatAmount(total)}</Text>
-              <Text style={[styles.totalCount, { color: colors.textMuted }]}>{filteredRecords.length} 笔</Text>
-            </BlurView>
+            {theme === 'dark' ? (
+              <LinearGradient colors={['rgba(0,229,255,0.12)', 'rgba(0,184,212,0.04)']} style={styles.totalBlur}>
+                <Text style={[styles.totalLabel, { color: '#00E5FF' }]}>
+                  {monthFilter ? `${monthLabel(monthFilter)} 支出` : '累计支出'}
+                </Text>
+                <Text style={[styles.totalValue, { color: '#00E5FF' }]}>¥{formatAmount(total)}</Text>
+                <Text style={[styles.totalCount, { color: 'rgba(0,229,255,0.5)' }]}>{filteredRecords.length} 笔</Text>
+              </LinearGradient>
+            ) : (
+              <BlurView intensity={15} tint="light" style={[styles.totalBlur, { backgroundColor: colors.cardBg }]}>
+                <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
+                  {monthFilter ? `${monthLabel(monthFilter)} 支出` : '累计支出'}
+                </Text>
+                <Text style={[styles.totalValue, { color: colors.danger }]}>¥{formatAmount(total)}</Text>
+                <Text style={[styles.totalCount, { color: colors.textMuted }]}>{filteredRecords.length} 笔</Text>
+              </BlurView>
+            )}
           </View>
 
           {/* 预算进度 */}
           {budget > 0 && (
             <View style={styles.budgetCard}>
-              <BlurView intensity={theme === 'dark' ? 30 : 10} tint={theme} style={[styles.budgetBlur, { backgroundColor: colors.cardBg }]}>
+              <BlurView intensity={theme === 'dark' ? 20 : 10} tint={theme} style={[styles.budgetBlur, { backgroundColor: colors.cardBg, borderWidth: 1, borderColor: colors.cardBorder }]}>
                 <View style={styles.budgetHeader}>
                   <Text style={[styles.budgetLabel, { color: colors.textMuted }]}>预算</Text>
                   <Text style={[styles.budgetAmount, { color: colors.text }]}>¥{formatAmount(budget)}</Text>

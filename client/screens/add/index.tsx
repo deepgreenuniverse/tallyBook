@@ -72,7 +72,7 @@ export default function AddRecordPage() {
   return (
     <Screen style={{ backgroundColor: colors.background }}>
       <LinearGradient
-        colors={theme === 'dark' ? ['#0A0E1A', '#121830', '#0D1230'] : ['#F4F6FB', '#FAFBFF', '#EEF2FF']}
+        colors={theme === 'dark' ? ['#080B1A', '#141B40', '#0C1035'] : ['#F4F6FB', '#FAFBFF', '#EEF2FF']}
         style={StyleSheet.absoluteFill}
       />
 

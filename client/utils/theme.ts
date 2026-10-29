@@ -1,4 +1,4 @@
-// 主题配色方案 — 赛博/未来感
+// 主题配色方案
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -21,27 +21,27 @@ export interface ThemeColors {
 }
 
 export const darkTheme: ThemeColors = {
-  background: '#0A0E1A',
-  backgroundSecondary: '#111627',
+  background: '#080B1A',
+  backgroundSecondary: '#0F1330',
 
-  text: '#E8ECF4',
-  textSecondary: 'rgba(232,236,244,0.65)',
-  textMuted: 'rgba(232,236,244,0.35)',
+  text: '#E4E8F6',
+  textSecondary: 'rgba(228,232,246,0.60)',
+  textMuted: 'rgba(228,232,246,0.30)',
 
-  cardBg: 'rgba(255,255,255,0.04)',
-  cardBorder: 'rgba(0,229,255,0.12)',
+  cardBg: 'rgba(20,25,60,0.75)',
+  cardBorder: 'rgba(0,229,255,0.15)',
 
   primary: '#00E5FF',
-  primaryLight: 'rgba(0,229,255,0.10)',
+  primaryLight: 'rgba(0,229,255,0.12)',
 
   success: '#00E676',
   danger: '#FF5252',
   warning: '#FFD740',
 
-  tabBarBg: 'rgba(10,14,26,0.95)',
-  tabBarBorder: 'rgba(0,229,255,0.08)',
+  tabBarBg: 'rgba(8,11,26,0.96)',
+  tabBarBorder: 'rgba(0,229,255,0.06)',
 
-  modalBg: '#141929',
+  modalBg: '#141830',
 };
 
 export const lightTheme: ThemeColors = {
