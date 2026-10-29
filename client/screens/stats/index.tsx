@@ -456,7 +456,7 @@ export default function StatsPage() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   flex: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 80 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 60, marginBottom: 12 },
   title: { fontSize: 28, fontWeight: '700' },
   headerBtns: { flexDirection: 'row', gap: 10 },

@@ -182,7 +182,7 @@ export default function AddRecordPage() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   flex: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 80 },
   title: { fontSize: 28, fontWeight: '700', marginTop: 60, marginBottom: 24 },
   amountCard: { borderRadius: 16, overflow: 'hidden', marginBottom: 32 },
   amountBlur: { padding: 24 },
