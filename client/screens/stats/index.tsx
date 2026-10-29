@@ -140,7 +140,7 @@ export default function StatsPage() {
     setEditingRecord(null);
   };
 
-  // 分享
+  // 分享（复制到剪贴板）
   const handleShare = async () => {
     const lines: string[] = [];
     lines.push('📊 装修账单');
@@ -160,9 +160,17 @@ export default function StatsPage() {
         lines.push(`  ${c.name}  ¥${formatAmount(c.total)}`);
       });
     }
+    const text = lines.join('\n');
     try {
-      await Share.share({ message: lines.join('\n') });
-    } catch { /* user cancelled */ }
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+        Alert.alert('已复制', '账单摘要已复制到剪贴板，可粘贴到微信等应用分享');
+      } else {
+        await Share.share({ message: text });
+      }
+    } catch {
+      try { await Share.share({ message: text }); } catch { /* cancelled */ }
+    }
   };
 
   const formatAmount = (num: number) => num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -184,7 +192,7 @@ export default function StatsPage() {
   return (
     <Screen style={{ backgroundColor: colors.background }}>
       <LinearGradient
-        colors={theme === 'dark' ? ['#1A1A2E', '#16213E', '#0F3460'] : ['#F8F6F0', '#FFFBF5', '#F5F0E8']}
+        colors={theme === 'dark' ? ['#121A0F', '#1C2418', '#162610'] : ['#F5F8F0', '#F0F5EA', '#E8F0DC']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -395,7 +403,7 @@ export default function StatsPage() {
                 <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirm} onPress={handleEditConfirm}>
-                <LinearGradient colors={['#C8963E', '#D4A853']} style={styles.modalConfirmGrad}>
+                <LinearGradient colors={['#689F38', '#8BC34A']} style={styles.modalConfirmGrad}>
                   <Text style={styles.modalConfirmText}>保存</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -427,7 +435,7 @@ export default function StatsPage() {
                 <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalConfirm} onPress={handleSetBudget}>
-                <LinearGradient colors={['#C8963E', '#D4A853']} style={styles.modalConfirmGrad}>
+                <LinearGradient colors={['#689F38', '#8BC34A']} style={styles.modalConfirmGrad}>
                   <Text style={styles.modalConfirmText}>确定</Text>
                 </LinearGradient>
               </TouchableOpacity>
